@@ -1,0 +1,49 @@
+name: Generate Monthly Statement
+
+on:
+  schedule:
+    # 18:00 IST on the last calendar day (the Python script also checks month-end).
+    - cron: "30 12 28-31 * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: monthly-statement-generator
+  cancel-in-progress: false
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Generate statement and charts
+        env:
+          EMAIL_ADDRESS: \${{ secrets.EMAIL_ADDRESS }}
+          EMAIL_PASSWORD: \${{ secrets.EMAIL_PASSWORD }}
+          RECEIVER_EMAIL: \${{ secrets.RECEIVER_EMAIL }}
+        run: python main.py
+
+      - name: Commit generated files and history
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add history.csv generated_files/
+          if ! git diff --cached --quiet; then
+            git commit -m "Generate monthly statement"
+            git push
+          else
+            echo "No generated changes to commit."
+          fi
