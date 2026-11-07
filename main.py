@@ -233,9 +233,14 @@ def make_charts(history: list[dict]) -> None:
 
 
 def send_email(output_file: Path, totals: dict) -> None:
-    sender = os.getenv("EMAIL_ADDRESS")
-    password = os.getenv("EMAIL_PASSWORD")
-    receiver = os.getenv("RECEIVER_EMAIL")
+    sender = (os.getenv("EMAIL_ADDRESS") or "").strip()
+    password = (os.getenv("EMAIL_PASSWORD") or "").strip()
+    receiver = (os.getenv("RECEIVER_EMAIL") or "").strip()
+
+    # Temporary diagnostics: verify email address secrets are loaded (never log password).
+    print(f"EMAIL_ADDRESS loaded: {bool(sender)} | value: {sender or '<empty>'}")
+    print(f"RECEIVER_EMAIL loaded: {bool(receiver)} | value: {receiver or '<empty>'}")
+    print(f"EMAIL_PASSWORD loaded: {bool(password)}")
     if not all((sender, password, receiver)):
         print("Email skipped: configure EMAIL_ADDRESS, EMAIL_PASSWORD and RECEIVER_EMAIL secrets.")
         return
