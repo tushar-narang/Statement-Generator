@@ -277,7 +277,11 @@ The Excel statement and monthly charts are attached.
             filename=path.name
         )
 
-    with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=30) as smtp:
+    with smtplib.SMTP("smtp.gmail.com", 587, timeout=60) as smtp:
+        smtp.set_debuglevel(1)
+        smtp.ehlo()
+        smtp.starttls()
+        smtp.ehlo()
         smtp.login(sender, password)
         smtp.send_message(message)
     print(f"Email sent to {receiver}.")
