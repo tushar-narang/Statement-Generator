@@ -29,6 +29,22 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      - name: Verify secret availability
+        env:
+          EMAIL_ADDRESS: ${{ secrets.EMAIL_ADDRESS }}
+          EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+          RECEIVER_EMAIL: ${{ secrets.RECEIVER_EMAIL }}
+        run: |
+          python - <<'PY'
+          import os
+          import hashlib
+
+          for key in ["EMAIL_ADDRESS", "EMAIL_PASSWORD", "RECEIVER_EMAIL"]:
+              value = os.getenv(key, "")
+              fingerprint = hashlib.sha256(value.encode()).hexdigest()[:12]
+              print(f"{key}: loaded={bool(value)}, fingerprint={fingerprint}")
+          PY
+
       - name: Generate statement and charts
         env:
           EMAIL_ADDRESS: \${{ secrets.EMAIL_ADDRESS }}
