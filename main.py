@@ -287,6 +287,7 @@ The Excel statement and monthly charts are attached.
 
     print("Sender fingerprint:", fingerprint(sender))
     print("Password fingerprint:", fingerprint(password))
+    print("DEBUG VERSION: secret-check-2026-11-07-v2")
     
     with smtplib.SMTP("smtp.gmail.com", 587, timeout=60) as smtp:
         smtp.set_debuglevel(1)
