@@ -14,6 +14,9 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from openpyxl import load_workbook
 
+import hashlib
+
+
 ROOT = Path(__file__).resolve().parent
 GENERATED_DIR = ROOT / "generated_files"
 HISTORY_FILE = ROOT / "history.csv"
@@ -232,6 +235,9 @@ def make_charts(history: list[dict]) -> None:
     )
 
 
+def fingerprint(value):
+    return hashlib.sha256(value.encode()).hexdigest()[:12]
+    
 def send_email(output_file: Path, totals: dict) -> None:
     sender = (os.getenv("EMAIL_ADDRESS") or "").strip()
     password = (os.getenv("EMAIL_PASSWORD") or "").strip()
@@ -277,6 +283,11 @@ The Excel statement and monthly charts are attached.
             filename=path.name
         )
 
+    
+
+    print("Sender fingerprint:", fingerprint(sender))
+    print("Password fingerprint:", fingerprint(password))
+    
     with smtplib.SMTP("smtp.gmail.com", 587, timeout=60) as smtp:
         smtp.set_debuglevel(1)
         smtp.ehlo()
